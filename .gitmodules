@@ -1,0 +1,6 @@
+[submodule "CImg"]
+	path = CImg
+	url = https://github.com/dtschump/CImg.git
+[submodule "json"]
+	path = json
+	url = https://github.com/nlohmann/json.git
