@@ -1,6 +1,8 @@
 #include "GithubAPI.hpp"
 #include "json.hpp"
 
+#include <curl/curl.h>
+#include <fstream>
 #include <iostream>
 
 GithubAPI::GithubAPI(std::string username)
@@ -42,6 +44,22 @@ bool GithubAPI::DownloadAvatar() {
 size_t GithubAPI::GetAvatarBuffer(std::vector<unsigned char> &avatar_buffer) {
   avatar_buffer = this->avatar_buffer;
   return avatar_buffer.size();
+}
+
+bool GithubAPI::AvatarToFile(std::string filename) {
+  std::vector<unsigned char> avatar_buffer;
+
+  if (GetAvatarBuffer(avatar_buffer) == 0) {
+    return false;
+  }
+
+  {
+    std::ofstream avout(filename, std::ios::out | std::ios::binary);
+    avout.write((char const *)avatar_buffer.data(), avatar_buffer.size());
+    avout.close();
+  }
+
+  return true;
 }
 
 bool GithubAPI::ResetCURL() {

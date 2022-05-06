@@ -18,6 +18,13 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+#if 0
+  if (gAPI.AvatarToFile("/tmp/" + gAPI.GetUsername() + ".whatever") == false)
+  {
+    return 1;
+  }
+#endif
+
   {
     std::vector<unsigned char> avatar;
 
@@ -25,7 +32,9 @@ int main(int argc, char **argv) {
       return 1;
     }
 
-    iM.SetJpegFromBuffer(avatar);
+    if (iM.SetImageFromBuffer(avatar) == false) {
+      return 1;
+    }
     iM.SaveToFile(gAPI.GetUsername() + ".jpg");
   }
 

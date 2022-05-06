@@ -1,9 +1,10 @@
 #ifndef GITHUBAPI_H
 #define GITHUBAPI_H 1
 
-#include <curl/curl.h>
 #include <string>
 #include <vector>
+
+typedef void CURL;
 
 class GithubAPI {
 public:
@@ -12,6 +13,7 @@ public:
 
   bool DownloadAvatar();
   size_t GetAvatarBuffer(std::vector<unsigned char> &avatar_buffer);
+  bool AvatarToFile(std::string filename);
   std::string GetUsername() { return username; }
 
 private:
