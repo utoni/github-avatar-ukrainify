@@ -20,6 +20,7 @@ private:
   bool ResetCURL();
   bool GetAvatarURL();
   bool GetAvatarImage();
+  void CheckReturnedUsername(std::string const & github_username);
 
   std::string username;
   std::string avatar_url;

@@ -104,13 +104,8 @@ bool GithubAPI::GetAvatarURL() {
   }
 
   json = nlohmann::json::parse(json_str);
-
-  if (json["login"] != username) {
-    std::cerr << "Username mismatch: " << json["login"] << " != " << username
-              << std::endl;
-  }
-
   avatar_url = json["avatar_url"];
+  CheckReturnedUsername(json["login"]);
 failure:
   curl_slist_free_all(headers);
 
@@ -149,4 +144,19 @@ failure:
   curl_slist_free_all(headers);
 
   return ret;
+}
+
+void GithubAPI::CheckReturnedUsername(std::string const & github_username) {
+  std::string returned_username = github_username;
+  std::string desired_username = username;
+
+  std::transform(returned_username.begin(), returned_username.end(), returned_username.begin(),
+    [](unsigned char c){ return std::tolower(c); });
+  std::transform(desired_username.begin(), desired_username.end(), desired_username.begin(),
+    [](unsigned char c){ return std::tolower(c); });
+
+  if (returned_username != desired_username) {
+    std::cerr << "Username mismatch (Github != CmdArg): " << github_username << " != " << desired_username
+              << std::endl;
+  }
 }

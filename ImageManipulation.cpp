@@ -206,12 +206,6 @@ void ImageManipulation::Ukrainify(float opacity) {
   unsigned char upper_color[channels] = {0, 87, 184};
   unsigned char lower_color[channels] = {255, 215, 0};
 
-  if (image.spectrum() != channels) {
-    std::cerr << "Expected an image with " << channels << " Channels, but got "
-              << image.spectrum() << std::endl;
-    return;
-  }
-
   image.draw_rectangle(0, 0, image.width(), image.height() / 2, upper_color,
                        opacity);
   image.draw_rectangle(0, image.height() / 2, image.width(), image.height(),
