@@ -180,6 +180,10 @@ static bool load_png_buffer(std::vector<unsigned char> &image_buffer,
   return true;
 }
 
+void ImageManipulation::LoadImage(const std::string & filename) {
+  image.load(filename.c_str());
+}
+
 bool ImageManipulation::SetImageFromBuffer(
     std::vector<unsigned char> &image_buffer) {
   switch (GetImageFormat(image_buffer)) {
@@ -202,14 +206,55 @@ void ImageManipulation::SaveToFile(std::string filename) {
 }
 
 void ImageManipulation::Ukrainify(float opacity) {
-  size_t const channels = 3;
-  unsigned char upper_color[channels] = {0, 87, 184};
-  unsigned char lower_color[channels] = {255, 215, 0};
+  unsigned char upper_color[] = {   0,  87,  184 };
+  unsigned char lower_color[] = { 255, 215,    0 };
 
   image.draw_rectangle(0, 0, image.width(), image.height() / 2, upper_color,
                        opacity);
   image.draw_rectangle(0, image.height() / 2, image.width(), image.height(),
                        lower_color, opacity);
+}
+
+void ImageManipulation::Israelify(float opacity) {
+    cimg_library::CImg<unsigned char> overlay(image.width(), image.height(), 1, 4, 0);
+    float outer_r = 20.0f;
+    float thickness = 10.0f;
+    const float cx = image.width() - outer_r;
+    const float cy = image.height() - outer_r - thickness / 2.0f;
+    unsigned char color[] = { 0, 0, 255 };
+
+    auto make_triangle = [&](float r, float angle_offset) {
+        cimg_library::CImg<float> tri(3, 2);
+        for (int i = 0; i < 3; ++i) {
+            float angle = 2 * M_PI * i / 3.0f + angle_offset;
+            tri(i, 0) = cx + r * std::cos(angle);
+            tri(i, 1) = cy + r * std::sin(angle);
+        }
+        return tri;
+    };
+
+    unsigned char rgba_color[] = { color[0], color[1], color[2], 255 };
+    overlay.draw_polygon(make_triangle(outer_r, -M_PI/2), rgba_color, 1.0f);
+    overlay.draw_polygon(make_triangle(outer_r, -M_PI/2 + M_PI), rgba_color, 1.0f);
+
+    cimg_library::CImg<unsigned char> alpha_mask(image.width(), image.height(), 1, 1, 0);
+    alpha_mask.draw_polygon(make_triangle(outer_r - thickness, -M_PI/2), color, 1.0f);
+    alpha_mask.draw_polygon(make_triangle(outer_r - thickness, -M_PI/2 + M_PI), color, 1.0f);
+
+    cimg_forXY(alpha_mask, x, y) {
+        if (alpha_mask(x, y) == 255) {
+            overlay(x, y, 0, 3) = 0;
+        }
+    }
+
+    cimg_forXY(image, x, y) {
+        for (int c = 0; c < 3; ++c) {
+            image(x, y, 0, c) = (unsigned char)(
+                overlay(x, y, 0, c) * opacity +
+                image(x, y, 0, c)
+            );
+        }
+    }
 }
 
 enum ImageFormat

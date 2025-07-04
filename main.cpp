@@ -1,5 +1,10 @@
+#ifndef LOCAL_FILE
 #include "GithubAPI.hpp"
+#endif
+
+#ifndef DOWNLOAD_ONLY
 #include "ImageManipulation.hpp"
+#endif
 
 #include <iostream>
 #include <vector>
@@ -11,35 +16,46 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+#ifndef LOCAL_FILE
   GithubAPI gAPI(argv[1]);
-  ImageManipulation iM;
-
   if (gAPI.DownloadAvatar() == false) {
     return 1;
   }
+#endif
+#ifndef DOWNLOAD_ONLY
+  ImageManipulation iM;
+#endif
 
-#if 0
-  if (gAPI.AvatarToFile("/tmp/" + gAPI.GetUsername() + ".whatever") == false)
+#if defined(DOWNLOAD_ONLY) && !defined(LOCAL_FILE)
+  std::string outfile = "./" + gAPI.GetUsername() + ".jpg";
+  std::cout << "Saving Avatar from '" << gAPI.GetUsername() << "' to '" << outfile << "'" << std::endl;
+  if (gAPI.AvatarToFile(outfile) == false)
   {
     return 1;
   }
-#endif
-
+#else
+  std::string file_basename;
   {
     std::vector<unsigned char> avatar;
-
+#ifdef LOCAL_FILE
+    file_basename = "out";
+    iM.LoadImage(std::string(argv[1]));
+#else
+    file_basename = gAPI.GetUsername();
     if (gAPI.GetAvatarBuffer(avatar) == 0) {
       return 1;
     }
-
     if (iM.SetImageFromBuffer(avatar) == false) {
       return 1;
     }
-    iM.SaveToFile(gAPI.GetUsername() + ".jpg");
+    iM.SaveToFile(file_basename + ".jpg");
+#endif
   }
 
   iM.Ukrainify(0.3f);
-  iM.SaveToFile(gAPI.GetUsername() + ".modified.jpg");
+  iM.Israelify(0.3f);
+  iM.SaveToFile(file_basename + ".modified.jpg");
+#endif
 
   return 0;
 }
